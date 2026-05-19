@@ -1,17 +1,25 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { airports } from "@/lib/demo-data";
+import { airports, firstValidDestination, routesByOrigin } from "@/lib/demo-data";
 import { useFlightStore } from "@/stores/flight-store";
 
 export function SearchPanel() {
   const router = useRouter();
   const { searchQuery, setSearchQuery } = useFlightStore();
+  const [origin, setOrigin] = useState(searchQuery.origin);
+  const [destination, setDestination] = useState(
+    routesByOrigin[searchQuery.origin]?.includes(searchQuery.destination)
+      ? searchQuery.destination
+      : firstValidDestination(searchQuery.origin)
+  );
+  const destinations = useMemo(() => routesByOrigin[origin] ?? [], [origin]);
 
   return (
     <Card className="w-full rounded-lg border-0 shadow-sm ring-1 ring-border">
@@ -21,13 +29,13 @@ export function SearchPanel() {
       </CardHeader>
       <CardContent>
         <form
-          className="grid gap-3 md:grid-cols-[1fr_1fr_150px_120px_auto]"
+          className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_150px_120px_auto]"
           onSubmit={(event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             const query = {
-              origin: String(formData.get("origin")),
-              destination: String(formData.get("destination")),
+              origin,
+              destination,
               date: String(formData.get("date")),
               passengers: Number(formData.get("passengers")),
             };
@@ -37,9 +45,19 @@ export function SearchPanel() {
             );
           }}
         >
-          <label className="grid gap-1 text-xs font-medium">
+          <label className="grid gap-1 text-sm font-medium">
             Origin
-            <NativeSelect name="origin" defaultValue={searchQuery.origin} className="w-full">
+            <NativeSelect
+              name="origin"
+              value={origin}
+              onChange={(event) => {
+                const nextOrigin = event.target.value;
+                const nextDestination = firstValidDestination(nextOrigin);
+                setOrigin(nextOrigin);
+                setDestination(nextDestination);
+              }}
+              className="w-full"
+            >
               {airports.map((airport) => (
                 <NativeSelectOption key={airport} value={airport}>
                   {airport}
@@ -47,25 +65,25 @@ export function SearchPanel() {
               ))}
             </NativeSelect>
           </label>
-          <label className="grid gap-1 text-xs font-medium">
+          <label className="grid gap-1 text-sm font-medium">
             Destination
-            <NativeSelect name="destination" defaultValue={searchQuery.destination} className="w-full">
-              {airports.map((airport) => (
+            <NativeSelect name="destination" value={destination} onChange={(event) => setDestination(event.target.value)} className="w-full">
+              {destinations.map((airport) => (
                 <NativeSelectOption key={airport} value={airport}>
                   {airport}
                 </NativeSelectOption>
               ))}
             </NativeSelect>
           </label>
-          <label className="grid gap-1 text-xs font-medium">
+          <label className="grid gap-1 text-sm font-medium">
             Date
             <Input type="date" name="date" defaultValue={searchQuery.date} min={new Date().toISOString().slice(0, 10)} />
           </label>
-          <label className="grid gap-1 text-xs font-medium">
+          <label className="grid gap-1 text-sm font-medium">
             Passengers
             <Input type="number" name="passengers" min={1} max={6} defaultValue={searchQuery.passengers} />
           </label>
-          <Button type="submit" size="lg" className="self-end">
+          <Button type="submit" size="lg" className="self-end sm:col-span-2 lg:col-span-1">
             <Search aria-hidden="true" />
             Search
           </Button>

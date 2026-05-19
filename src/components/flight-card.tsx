@@ -10,15 +10,15 @@ export function FlightCard({ flight, passengers }: { flight: Flight; passengers:
   return (
     <Card className="rounded-lg border-0 shadow-sm ring-1 ring-border">
       <CardHeader className="gap-2 sm:grid-cols-[1fr_auto]">
-        <div>
-          <CardTitle className="flex items-center gap-2 text-base">
+        <div className="min-w-0">
+          <CardTitle className="flex flex-wrap items-center gap-2 text-base">
             {flight.flight_no}
             <Badge variant={flight.status === "delayed" ? "destructive" : "secondary"}>{flight.status}</Badge>
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">{flight.aircraft_type}</p>
         </div>
-        <CardAction>
-          <Button asChild size="lg">
+        <CardAction className="static col-start-auto row-start-auto justify-self-stretch sm:col-start-2 sm:row-start-1 sm:justify-self-end">
+          <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href={`/book/${flight.id}?passengers=${passengers}`}>
               Select
               <ArrowRight aria-hidden="true" />

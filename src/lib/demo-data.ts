@@ -103,6 +103,15 @@ export const airports = Array.from(
   new Set(demoFlights.flatMap((flight) => [flight.origin, flight.destination]))
 ).sort();
 
+export const routesByOrigin = demoFlights.reduce<Record<string, string[]>>((routes, flight) => {
+  routes[flight.origin] = Array.from(new Set([...(routes[flight.origin] ?? []), flight.destination])).sort();
+  return routes;
+}, {});
+
+export function firstValidDestination(origin: string) {
+  return routesByOrigin[origin]?.[0] ?? airports.find((airport) => airport !== origin) ?? airports[0];
+}
+
 export function buildDemoSeats(flightId: string): Seat[] {
   const letters = ["A", "B", "C", "D", "E", "F"];
   const seats: Seat[] = [];

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppNav } from "@/components/app-nav";
 import { InstallPrompt } from "@/components/install-prompt";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn(
         "h-full",
         "antialiased",
@@ -43,12 +45,14 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col">
-        <TooltipProvider>
-          <AppNav />
-          {children}
-          <InstallPrompt />
-          <ServiceWorkerRegister />
-        </TooltipProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <AppNav />
+            {children}
+            <InstallPrompt />
+            <ServiceWorkerRegister />
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

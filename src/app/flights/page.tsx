@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FlightCard } from "@/components/flight-card";
 import { Button } from "@/components/ui/button";
 import { getFlights } from "@/lib/data";
+import { routesByOrigin } from "@/lib/demo-data";
 import type { SearchQuery } from "@/lib/types";
 
 export default async function FlightsPage({
@@ -17,6 +18,7 @@ export default async function FlightsPage({
     date: params.date,
     passengers,
   });
+  const exactRouteExists = Boolean(params.origin && params.destination && routesByOrigin[params.origin]?.includes(params.destination));
 
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
@@ -31,6 +33,11 @@ export default async function FlightsPage({
           <Link href="/">Modify search</Link>
         </Button>
       </div>
+      {!exactRouteExists && params.origin && params.destination && (
+        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+          No direct seeded route exists for {params.origin} to {params.destination}. Showing available flights from {params.origin}.
+        </div>
+      )}
       <div className="grid gap-4">
         {flights.map((flight) => (
           <FlightCard key={flight.id} flight={flight} passengers={passengers} />

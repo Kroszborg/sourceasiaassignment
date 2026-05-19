@@ -18,12 +18,17 @@ export default async function AuthPage({ searchParams }: { searchParams: Promise
           <form className="space-y-3">
             <label className="grid gap-1 text-xs font-medium">
               Email
-              <Input name="email" type="email" required placeholder="you@example.com" />
+              <Input name="email" type="email" required defaultValue="test.passenger@example.com" placeholder="you@example.com" />
             </label>
             <label className="grid gap-1 text-xs font-medium">
               Password
-              <Input name="password" type="password" required minLength={6} placeholder="At least 6 characters" />
+              <Input name="password" type="password" required minLength={6} defaultValue="SourceAsia123!" placeholder="At least 6 characters" />
             </label>
+            <div className="rounded-lg border bg-muted/60 p-3 text-sm">
+              <p className="font-medium">Demo login</p>
+              <p className="mt-1 text-muted-foreground">Email: test.passenger@example.com</p>
+              <p className="text-muted-foreground">Password: SourceAsia123!</p>
+            </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <Button formAction={signIn} type="submit">
                 Sign in

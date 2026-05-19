@@ -11,13 +11,12 @@ export async function getFlights(query?: Partial<SearchQuery>): Promise<Flight[]
 
   let request = supabase.from("flights").select("*").order("departs_at", { ascending: true });
 
-  if (query?.origin) request = request.ilike("origin", query.origin);
-  if (query?.destination) request = request.ilike("destination", query.destination);
+  if (query?.origin) request = request.eq("origin", query.origin);
+  if (query?.destination) request = request.eq("destination", query.destination);
   if (query?.date) {
     const start = new Date(query.date);
-    const end = new Date(query.date);
-    end.setDate(end.getDate() + 1);
-    request = request.gte("departs_at", start.toISOString()).lt("departs_at", end.toISOString());
+    start.setHours(0, 0, 0, 0);
+    request = request.gte("departs_at", start.toISOString());
   }
 
   const { data, error } = await request;
@@ -26,7 +25,17 @@ export async function getFlights(query?: Partial<SearchQuery>): Promise<Flight[]
     return filterFlights(demoFlights, query);
   }
 
-  return data ?? [];
+  if (data?.length || !query?.origin || !query?.destination) {
+    return data ?? [];
+  }
+
+  const fallback = await supabase
+    .from("flights")
+    .select("*")
+    .eq("origin", query.origin)
+    .order("departs_at", { ascending: true });
+
+  return fallback.data ?? [];
 }
 
 export async function getFlight(id: string): Promise<Flight | null> {
@@ -93,11 +102,15 @@ export async function getBooking(id: string): Promise<Booking | null> {
 }
 
 function filterFlights(flights: Flight[], query?: Partial<SearchQuery>) {
-  return flights.filter((flight) => {
+  const exact = flights.filter((flight) => {
     const originMatch = !query?.origin || flight.origin.toLowerCase() === query.origin.toLowerCase();
     const destinationMatch =
       !query?.destination || flight.destination.toLowerCase() === query.destination.toLowerCase();
-    const dateMatch = !query?.date || flight.departs_at.slice(0, 10) === query.date;
+    const dateMatch = !query?.date || new Date(flight.departs_at) >= new Date(`${query.date}T00:00:00`);
     return originMatch && destinationMatch && dateMatch;
   });
+
+  if (exact.length || !query?.origin || !query?.destination) return exact;
+
+  return flights.filter((flight) => flight.origin.toLowerCase() === query.origin?.toLowerCase());
 }

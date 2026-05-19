@@ -10,10 +10,10 @@ export default function Home() {
         <div className="space-y-5">
           <Badge variant="outline">Flight Management PWA</Badge>
           <div className="space-y-3">
-            <h1 className="max-w-3xl text-4xl font-semibold tracking-normal text-balance sm:text-5xl">
+            <h1 className="max-w-3xl text-balance sm:text-5xl">
               Book, manage, and reschedule flights with live seat availability.
             </h1>
-            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+            <p className="max-w-2xl text-base text-muted-foreground">
               A production-style internship assignment built with Next.js App Router, Supabase, realtime seat maps, RLS, atomic booking RPCs, Zustand persistence, and PWA support.
             </p>
           </div>

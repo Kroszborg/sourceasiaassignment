@@ -47,7 +47,7 @@ export function BookingFlow({
           </CardHeader>
           <CardContent className="space-y-4">
             {passengers.map((passenger, index) => (
-              <div key={index} className="grid gap-3 rounded-lg border p-3 sm:grid-cols-2">
+              <div key={index} className="grid gap-3 rounded-lg border bg-background/50 p-3 sm:grid-cols-2">
                 <p className="font-medium sm:col-span-2">Passenger {index + 1}</p>
                 <label className="grid gap-1 text-xs font-medium">
                   Full name
