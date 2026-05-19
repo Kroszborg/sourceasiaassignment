@@ -1,29 +1,61 @@
 # Source Asia Air - Flight Management PWA
 
-Flight Management internship assignment built with Next.js 16 App Router, shadcn, Tailwind CSS, Supabase Auth/Postgres/Realtime, atomic booking RPCs, Zustand persistence, and PWA support through `next-pwa`.
+Production-style Flight Management web app for the internship assignment. It supports flight search, booking, visual seat selection, Supabase Auth, booking management, rescheduling, cancellation, Zustand persistence, and PWA installation/offline behavior.
 
-## Features
+## Demo Account
+
+Use this account to test protected flows:
+
+```text
+Email: test.passenger@example.com
+Password: SourceAsia123!
+```
+
+The same credentials are shown and prefilled on `/auth`.
+
+## Tech Stack
+
+- Next.js 16 App Router
+- React 19 and TypeScript
+- Supabase Auth, PostgreSQL, RLS, RPC functions, and Realtime
+- Zustand with `persist`
+- Tailwind CSS and shadcn components
+- `next-pwa` with manifest, icons, runtime caching, and offline fallback
+
+## Implemented Features
 
 - Flight search by origin, destination, date, and passenger count.
-- Results page with fare, duration, status, and class-aware seat fees.
-- Booking flow with passenger details, live aircraft seat map, and PNR confirmation.
-- Supabase schema with RLS, seat-locking RPC, cancellation RPC, reschedule RPC, and a DB-level 2-hour cancellation guard.
-- My Bookings page with status badges, same-route rescheduling, cancellation confirmation, and last-bookings cache.
-- Zustand stores split into booking/search state and user/cache state. Passport numbers are excluded from persisted localStorage.
-- `next-pwa` manifest/icons, install prompt, service worker, flight-search caching, static asset caching, and offline fallback page.
+- Route-safe search form that prevents invalid seeded route pairs.
+- Results page with price, duration, aircraft, status, and class-aware booking.
+- Passenger form with passport data kept out of persisted local storage.
+- Scrollable mobile-friendly aircraft seat map with first, business, and economy zones.
+- Seat states for available, selected, and occupied, with tooltip details.
+- Supabase Realtime subscription for live seat availability updates.
+- Atomic seat reservation through an RPC that locks the seat row.
+- Confirmation page with generated PNR, flight, passenger, and seat details.
+- My Bookings page with status badges, same-route rescheduling, and cancellation dialogs.
+- DB-level cancellation protection within 2 hours of departure.
+- Light/dark mode toggle with shadcn-compatible theme tokens.
+- PWA manifest, install prompt, static asset cache, flight search cache, and offline page.
 
 ## Environment
 
-The app only needs these values at runtime:
+Create `.env` from `.env.example`.
+
+Required for the app:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-or-publishable-key
 ```
 
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is also supported as a fallback if your Supabase project uses the newer naming.
+Supported optional alias:
 
-For seed scripts:
+```bash
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+```
+
+Required only for seed scripts:
 
 ```bash
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
@@ -31,29 +63,31 @@ SEED_USER_EMAIL=test.passenger@example.com
 SEED_USER_PASSWORD=SourceAsia123!
 ```
 
-The existing `.env` already contains the required Supabase URL/key names. Do not commit `.env`; `.env.example` lists the safe variable names.
+Do not commit `.env`.
 
 ## Supabase Setup
 
 1. Create a Supabase project.
-2. Run `supabase/migrations/0001_flight_management.sql` in the Supabase SQL editor.
-3. Seed demo data using either SQL or the script:
+2. Run `supabase/migrations/0001_flight_management.sql` in the SQL editor.
+3. Seed demo data:
 
 ```bash
 npm run seed:demo
 ```
 
-The script creates 8 flights across 4 routes, 864 seats, and the test user account. If you prefer SQL editor seeding, run `supabase/migrations/0002_seed_flights.sql` and then `npm run seed:test-user`.
+The seed script creates:
 
-4. Enable Realtime for the `seats` table in Supabase if it is not already enabled.
-5. In Auth settings, either disable email confirmation for local testing or confirm the seed/test user.
+- 8 flights across 4 routes
+- 864 seats
+- demo test user
 
-Default test credentials:
+If you prefer SQL-only seeding, run `supabase/migrations/0002_seed_flights.sql`, then run:
 
-```text
-test.passenger@example.com
-SourceAsia123!
+```bash
+npm run seed:test-user
 ```
+
+Realtime is enabled for `public.seats` in the migration. If your Supabase project blocks publication changes in SQL, enable Realtime for the `seats` table manually in the dashboard.
 
 ## Local Development
 
@@ -62,7 +96,11 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open:
+
+```text
+http://localhost:3000
+```
 
 Quality checks:
 
@@ -73,39 +111,49 @@ npm run build
 
 ## Architecture Notes
 
-- Server Components read flights, seats, and bookings through `src/lib/data.ts`.
-- Supabase browser client is only used for auth/realtime client behavior; server reads and mutations use server-side clients/actions.
-- Mutations go through server actions in `src/app/actions.ts`, then into Supabase RPCs.
-- `reserve_seat_and_create_booking` locks the selected seat row with `for update`, marks it unavailable, creates the booking, and inserts passengers in one transaction.
-- `cancel_booking` updates booking status and frees the seat atomically; the trigger rejects cancellation within 2 hours of departure.
-- `reschedule_booking` only allows same-route flights and records the fare difference in `reschedules`.
-- `useFlightStore` persists search, selected flight, selected seat, current booking step, and safe passenger draft data. Its `partialize` deliberately excludes passport numbers.
-- `useUserStore` persists only the auth session token/email through Zustand. Last bookings are cached separately in `localStorage` for offline reading and are cleared on logout.
+- Server reads are centralized in `src/lib/data.ts`.
+- Supabase server client is used for Server Components and server actions.
+- Supabase browser client is used for auth state and Realtime only.
+- Mutations live in `src/app/actions.ts` and call database RPC functions.
+- `reserve_seat_and_create_booking` uses `for update` to prevent double booking.
+- `cancel_booking` updates booking status and frees the seat atomically.
+- `reschedule_booking` only allows same-route alternatives and records fee differences.
+
+## Zustand Store Design
+
+- `useFlightStore` persists search query, selected flight, selected seat, current step, and safe passenger draft data.
+- `useFlightStore` uses `partialize` to exclude passport numbers from local storage.
+- `useUserStore` persists only the auth token/email session data through Zustand.
+- Cached bookings are stored separately for offline reading and cleared on logout.
+- Booking state resets after successful booking cancellation and logout.
 
 ## PWA Notes
 
-The app uses `next-pwa`, `manifest.webmanifest`, SVG icons, `/offline`, an install prompt, and runtime caching rules:
+`next-pwa` is configured in `next.config.ts`.
 
-- `StaleWhileRevalidate` for Supabase flight search results.
+- `StaleWhileRevalidate` for Supabase flight search requests.
 - `CacheFirst` for static assets.
-- Offline fallback document at `/offline`.
+- Manifest includes app name, theme color, display mode, and 192/512 icons.
+- Offline fallback route: `/offline`.
+- Install prompt banner appears when the browser fires `beforeinstallprompt`.
 
-Add a Lighthouse PWA screenshot here after deploying:
+Lighthouse PWA screenshot:
 
 ```text
-TODO: Insert Lighthouse PWA screenshot before final submission.
+TODO: Add screenshot after Vercel deployment.
 ```
-
-## Deployment
-
-Vercel is recommended. Add the same Supabase env vars in Vercel project settings, deploy, then submit both the GitHub repository link and production URL.
 
 ## Submission Checklist
 
-- [x] Public GitHub repository ready with source files and meaningful commit groups to create.
-- [x] `.env.example` with Supabase runtime and seed variables.
-- [x] Supabase migration SQL files in `supabase/migrations`.
-- [x] Seed script for flights, seats, and test user account.
-- [x] README with local setup, Supabase config, and Zustand store explanation.
-- [ ] Deployed Vercel preview URL.
+- [x] Descriptive Git commit history.
+- [x] `.env.example` with Supabase variables.
+- [x] Supabase migrations in `supabase/migrations`.
+- [x] Seed script with flights, seats, and test user.
+- [x] README with setup, Supabase config, and Zustand explanation.
+- [x] Responsive light/dark UI.
+- [ ] Vercel production URL.
 - [ ] Lighthouse PWA screenshot after deployment.
+
+## Deployment
+
+Deploy on Vercel, add the same Supabase environment variables in project settings, then run a production Lighthouse audit and add the screenshot above.
