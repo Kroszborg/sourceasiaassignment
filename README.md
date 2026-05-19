@@ -121,9 +121,13 @@ npm run build
 - Offline fallback route: `/offline`.
 - Install prompt banner appears when the browser fires `beforeinstallprompt`.
 
-Lighthouse PWA screenshot:
+PWA Mobile UI:
 
 ![Source Asia Air PWA Mobile](./public/pwa.jpeg)
+
+Lighthouse PWA Audit:
+
+![Lighthouse Audit](./public/lighthouse.png)
 
 ## Submission Checklist
 
@@ -135,20 +139,6 @@ Lighthouse PWA screenshot:
 - [x] Responsive light/dark UI.
 - [x] Vercel production URL: [https://sourceasiaassignment.vercel.app/](https://sourceasiaassignment.vercel.app/)
 - [x] Lighthouse PWA screenshot after deployment.
-
-## Deployment
-
-Deployed on Vercel: [https://sourceasiaassignment.vercel.app/](https://sourceasiaassignment.vercel.app/)
-
-Add the same Supabase environment variables in project settings. Run a production Lighthouse audit to verify PWA scores.
-s.
-- Manifest includes app name, theme color, display mode, and 192/512 icons.
-- Offline fallback route: `/offline`.
-- Install prompt banner appears when the browser fires `beforeinstallprompt`.
-
-Lighthouse PWA screenshot:
-
-![Source Asia Air PWA Mobile](./public/pwa.jpeg)
 
 ## Deployment
 
