@@ -22,22 +22,6 @@ The same credentials are shown and prefilled on `/auth`.
 - Tailwind CSS and shadcn components
 - `next-pwa` with manifest, icons, runtime caching, and offline fallback
 
-## Implemented Features
-
-- Flight search by origin, destination, date, and passenger count.
-- Route-safe search form that prevents invalid seeded route pairs.
-- Results page with price, duration, aircraft, status, and class-aware booking.
-- Passenger form with passport data kept out of persisted local storage.
-- Scrollable mobile-friendly aircraft seat map with first, business, and economy zones.
-- Seat states for available, selected, and occupied, with tooltip details.
-- Supabase Realtime subscription for live seat availability updates.
-- Atomic seat reservation through an RPC that locks the seat row.
-- Confirmation page with generated PNR, flight, passenger, and seat details.
-- My Bookings page with status badges, same-route rescheduling, and cancellation dialogs.
-- DB-level cancellation protection within 2 hours of departure.
-- Light/dark mode toggle with shadcn-compatible theme tokens.
-- PWA manifest, install prompt, static asset cache, flight search cache, and offline page.
-
 ## Environment
 
 Create `.env` from `.env.example`.
@@ -139,9 +123,7 @@ npm run build
 
 Lighthouse PWA screenshot:
 
-```text
-TODO: Add screenshot after Vercel deployment.
-```
+![Source Asia Air PWA Mobile](./public/pwa.jpeg)
 
 ## Submission Checklist
 
@@ -151,9 +133,25 @@ TODO: Add screenshot after Vercel deployment.
 - [x] Seed script with flights, seats, and test user.
 - [x] README with setup, Supabase config, and Zustand explanation.
 - [x] Responsive light/dark UI.
-- [ ] Vercel production URL.
-- [ ] Lighthouse PWA screenshot after deployment.
+- [x] Vercel production URL: [https://sourceasiaassignment.vercel.app/](https://sourceasiaassignment.vercel.app/)
+- [x] Lighthouse PWA screenshot after deployment.
 
 ## Deployment
 
-Deploy on Vercel, add the same Supabase environment variables in project settings, then run a production Lighthouse audit and add the screenshot above.
+Deployed on Vercel: [https://sourceasiaassignment.vercel.app/](https://sourceasiaassignment.vercel.app/)
+
+Add the same Supabase environment variables in project settings. Run a production Lighthouse audit to verify PWA scores.
+s.
+- Manifest includes app name, theme color, display mode, and 192/512 icons.
+- Offline fallback route: `/offline`.
+- Install prompt banner appears when the browser fires `beforeinstallprompt`.
+
+Lighthouse PWA screenshot:
+
+![Source Asia Air PWA Mobile](./public/pwa.jpeg)
+
+## Deployment
+
+Deployed on Vercel: [https://sourceasiaassignment.vercel.app/](https://sourceasiaassignment.vercel.app/)
+
+Add the same Supabase environment variables in project settings. Run a production Lighthouse audit to verify PWA scores.
